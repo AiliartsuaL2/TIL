@@ -112,9 +112,9 @@ EffectiveJava 개인 공부 필기 + 인프런 백기선 EffectiveJava 라이브
   
   </details>
   
-  <details>
+</details> 
+
+<details>
   <summary><b>3장 모든 객체의 공통 메서드</b></summary>
-  
-  </details>
   
 </details>
