@@ -11,6 +11,9 @@ import java.util.stream.Collectors;
 public class Person {
     LocalDate birthday;
 
+    public Person() {
+    }
+
     public Person(LocalDate birthday){
         this.birthday = birthday;
     }
