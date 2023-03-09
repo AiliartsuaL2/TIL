@@ -41,4 +41,8 @@ HttpServletResponse
 - 바디 생성
 - 편의 기능 제공
   - Content-Type, 쿠키, Redirect
-
+- Http 응답 데이터 
+  - 단순 텍스트 응답
+    - writer.print()
+  - HTML 응답
+  - HTTP API - MessageBody JSON 응답
