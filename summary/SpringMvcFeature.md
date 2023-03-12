@@ -1,0 +1,42 @@
+- 로깅
+  - 운영 시스템에서는 sout을 안쓰고 별도의 로깅 라이브러리를 사용,,
+  - 로깅 라이브러리
+    - 스프링부트 라이브러리는 기본적으로 starter에 slf4j가 제공됨
+        - slf4j
+          - log4j, logback, log4j2등 수많은 라이브러리들을 통합해서 인터페이스로 제공
+          - 실무에서는 스프링 부트에서 제공하는 Logback 구현체를 많이 사용
+      - 로그를 사용하면 시간, 스레드 등이 나옴,,
+      - trace,debug,info,warn,error등의 로깅 레벨을 설정 할 수 있음
+        - 로컬서버 : trace 레벨
+        - 개발서버 : debug 레벨
+        - 운영서버 : info 레벨
+      - application.properties에서 로그 레벨 설정 가능,
+      - 자바는 언어 특성상 연산자(+)가 있으면 컴파일 시점에 이미 그 문자들을 더하기 연산을 해버림
+        - 이렇게되면 trace 레벨에서 log({},name)이 아닌 +를 해주면 로깅은 출력되지 않아도 리소스를 사용해버리는 꼴,,
+        - 따라서 + 하지말고 {}를 처리해줘야함 
+      - 로거는 설정을 통해 파일로 별도로 남길 수 있고 sout보다 성능도 좋다
+- @RestController
+  - RestAPI가 많이 사용 되어 Spring에서 지원하는 애노테이션
+  - Controller+ResponseBody,, 
+  - 기본적으로 return이 String이면 뷰 이름으로 인식되나 RestController의 경우 바디에 해당 메세지를 바로 입력시킨다.
+- @RequestMapping
+  - url 설정
+    - url의경우 배열로도 설정 가능(다중 url 설정 가능!)
+    - 매핑이 /hello 이지만 url 요청은 /hello/, /hello 둘 다 허용해줌
+  - method 설정
+    - 설정 하지 않을경우 method와 무관하게 호출된다.
+    - GetMapping, PostMapping 등 지원
+  - 특정 param 추가 매핑
+    - 특정 파라미터가 있거나 없는 조건을 추가 할 수 있음
+    - 잘 사용 안함
+  - 특정 headers 추가 매핑
+    - 특정 헤더가 있거나 없는 조건 추가 가능
+    - 잘 사용 안함
+  - 미디어 타입 조건 매핑(Content-Type,, consume)
+    - consumes = "application/json" 이런식으로 미디어타입 설정 가능
+    - HTTP 요청 Accept 헤더와 RequestMapping의 produce 일치
+      - 일치하지 않으면 406에러
+  - @PathVariable 경로변수
+    - 경로에 오는 데이터를 변수로 꺼낼 수 있음
+    - 최근 Rest API는 다음과같이 리소스 경로에 식별자를 넣는 스타일 선호
+    - PathVariable의 이름과 파라미터가 같으면 생략 가능
