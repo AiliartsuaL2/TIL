@@ -40,3 +40,71 @@
     - 경로에 오는 데이터를 변수로 꺼낼 수 있음
     - 최근 Rest API는 다음과같이 리소스 경로에 식별자를 넣는 스타일 선호
     - PathVariable의 이름과 파라미터가 같으면 생략 가능
+- 요청 파라미터
+  - 쿼리파라미터 
+    - GET - 쿼리 파라미터
+      - 메세지 바디 없이, URL의 쿼리 파라미터에 데이터를 포함해서 전달
+    - POST - HTML Form
+      - 메세지 바디에 쿼리 파라미터 형식으로 전달
+      - 쿼리 파라미터 형식이기 때문에 GET방식처럼 request.getParameter()로도 조회 가능함
+  - @RequestParam
+    - 파라미터 이름으로 바인딩 시킴
+    - 파라미터의 이름이 변수 이름과 같으면 name 속성 제거 가능
+    - 변수가 String,Integer,int등 단순 타입이면 @RequestParam도 생략 가능
+    - 하지만 애노테이션 정도는 살려두는게 유지보수 측면에서 좋음
+    - required 속성 : default는 true임
+      - true인경우 해당 파라미터가 없으면 해당 url 호출 안됨
+      - false인경우 값을 안넣으면 바인딩되는 변수에 null을 할당
+        - 이 때 해당 변수가 primitive타입인경우 null 할당이 안되기 때문에 주의 할 것  
+        - 따라서 박스타입으로 받거나 defaultValue 속성을 추가해주어야 함
+    - defaultValue 속성 : 속성이 없거나, 빈문자로 들어오는 값에 기본값을 설정해줌
+    - 요청 파라미터 Map으로 받기
+      - name속성 지정 없이 Map으로 받거나 MultiValueMap으로 받는다.
+      - Map(key=value)
+      - MultiValueMap(key=[value1,value2, ...])
+        - ex) (key=userIds, value=[id1, id2]) 이런식으로,, 들어옴
+      - 파라미터의 값이 1개가 확실하다면 Map을 사용해도 되지만, 그렇지 않다면 MultiValueMap을 사용한다!
+  - @ModelAttribute
+    - 보통 개발시 데이터를 바인딩해서 객체랑 매핑을 해주는 작업을 해줌,
+    - ModelAttribute 사용시, 해당 작업을 자동화해줌
+    - ModelAttribute 실행 순서
+      - 매핑되는 객체 생성
+      - 해당 객체의 프로퍼티를 찾아 setter 호출하여 파라미터의 값을 바인딩
+    - 바인딩 오류 : 숫자타입에 문자가 들어가는 경우 BindException 발생,,
+      - 해당 부분은 검증 부분에서 처리,,
+    - 해당 ModelAttribute도 생략 가능하다..
+      - @RequestParam도 생략 할 수 있는데 
+      - 스프링의 경우, String, int, Integer같은 단순 타입은 @RequestParam으로 처리하고
+      - 나머지는 @ModelAttribute로 처리한다.
+        - argumentResolver로 지정되어있는 타입(HttpServeltRequest 같은,,)은 ModelAttribute로 처리하지않음 
+- HTTP 요청 메세지 - 단순 텍스트
+  - HTTP API에서 사용,, JSON 형식,, 
+  - 요청 파라미터와 다르게, HTTP 메세지 바디를 통해 데이터가 넘어오는경우 @RequestParam, @ModelAttribute 사용 불가능
+    - 물론 POST로 HTML 폼인경우 요청파라미터로 인정됨
+  - Spring MVC는 다음 파라미터를 지원
+    - HttpEntity : HTTP header, body 정보를 편하게 조회 할 수 있음
+      - 요청 파라미터(Get에 쿼리 파라미터,, url?name=juho&age=23 )를 조회하는 기능과 관계 없음
+      - 응답에도 사용 가능
+        - 메세지 바디에 정보 직접 반환
+        - 헤더 정보 포함 가능
+        - view 조회 x
+      - HttpEntity를 상속받은 다음 객체들도 같은 기능 제공
+        - RequstEntity
+          - HttpMethod, url 정보가 추가, 요청에서 사용
+        - ResponseEntity
+          - Http 상태 코드 설정 가능,, 응답에서 사용 가능
+      - @RequestBody 제공
+        - 그냥 파라미터에 @RequestBody 선언해주고 String으로 받아버림
+        - @ResponseBody를 통해 응답에도 Body에 데이터를 넣어 전달 가능
+    - 이렇게 메세지 바디를 직접 조회하는 기능은 요청 파라미터(Get 파라미터)를 조회하는 @RequestParam, @ModelAttribute와는 전혀 관계 x
+  - HTTP 요청 메세지 - JSON
+    - @RequestBody 객체 파라미터
+      - HTTP 메세지 컨버터가 문자 뿐만 아니라 JSON도 자동으로 객체로 변환해줌
+        - @RequestBody VO data
+        - @RequestBody에 직접 만든 객체를 지정 할 수 있다.
+      - @RequestBody는 생략이 불가능하다.
+        - 스프링은 애노테이션 생략시 
+          - String,int,Integer 등의 단순 타입인경우 @RequestParam이 붙는다.
+          - 그 외 나머지 타입은 @ModelAttribute가 붙는다.
+          - 따라서 객체를 받는경우 @ModelAttribute가 적용되어 메세지 바디가 아닌 요청 파라미터를 처리하게 됨
+    - HTTP 요청시 content-type이 application/json인지 꼭 확인,,
