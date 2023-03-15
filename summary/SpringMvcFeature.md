@@ -108,3 +108,101 @@
           - 그 외 나머지 타입은 @ModelAttribute가 붙는다.
           - 따라서 객체를 받는경우 @ModelAttribute가 적용되어 메세지 바디가 아닌 요청 파라미터를 처리하게 됨
     - HTTP 요청시 content-type이 application/json인지 꼭 확인,,
+HTTP 응답
+    - 정적 리소스
+      - 웹 브라우저에 정적인 HTML, css, js를 제공 할 때는 정적 리소스 사용
+      - 스프링 부트는 클래스 패스의 다음 디렉토리에 있는 정적 리소스를 제공
+        - /static
+        - /public
+        - /resources/
+        - META-INF/resources
+    - 뷰 템플릿 사용
+      - 웹 브라우저에 동적인 HTML을 제공 할 때에는 뷰 템플릿을 사용한다.(서버 사이드 렌더링)
+      - 일반적으로 HTML을 동적으로 생성하는 용도로 사용하지만, 다른 것들도 사용 가능,,
+      - 스프링이 제공하는 기본 뷰 템플릿 경로
+        - src/main/resources/templates
+      - 컨트롤러 메서드의 반환 타입에 따른 변경
+        - String을 반환하는경우 
+          - @ResponseBody가 없으면 : 해당 경로의 뷰 리졸버가 실행되어 뷰를 찾고 렌더링
+          - @ResponseBody가 있으면 : 뷰 리졸버를 실행하지않고, HTTP 메세지 컨버터를 통하기때문에 HTTP 메세지 바디에 직접 해당 문자가 출력
+        - Void를 반환하는경우
+          - @Controller를 사용하고, HTTP 메세지 바디를 처리하는 파라미터가 없으면 요청 URL을 참고해서 논리 뷰 이름으로 사용
+          - 명시성이 너무 떨어져서 유지보수 헬 !! 권장하지 않음,,
+    - HTTP 메세지 사용
+      - HTTP API를 제공하는 경우, HTML이 아니라 데이터를 전달해야 하므로, HTTP 메세지 바디에 JSON 같은 형식으로 데이터를 보냄
+      - HTML이나 뷰 템플릿 사용해도 HTTP 응답 메세지 바디에 데이터가 담겨 전달됨
+      - ResponseEntity<VO> 로 반환하는 경우, 응답 코드를 지정 할 수 있지만 
+        - VO로 직접 반환하는 타입의 경우 반환 객체에 응답 코드를 지정 할 수 없기 때문에
+        - 애노테이션으로 @ResponseStatus(응답코드)로 지정 해줄 수 있다.
+          - 애노테이션이기 때문에 동적으로 설정 불가능,, 따라서 동적으로 응답코드 변경을 해야한다면 리턴타입을 ResponseEntity 사용
+        - 메서드에 @ResponseBody를 안붙이려면 클래스 레벨에 ResponseBody를 해도되고, Controller 대신 RestController 사용해도 좋다
+HTTP 메세지 컨버터
+  - 뷰 템플릿으로 HTML을 생성해서 응답하는것이 아니라, HTTP API처럼 JSON 데이터 사용하며 바디에 직접 읽거나 쓰는경우 HTTP 메세지 컨버터를 사용하면 편함
+  - @ResponseBody사용 원리
+    - 해당 어노테이션을 타면서 ViewResolver대신 HttpMessageConverter가 동작
+    - 반환타입이 객체인지 String인지 확인해서 해당 컨버터 메서드가 동작
+      - 기본 문자 처리 : StringHttpMessageConverter
+      - 기본 객체 처리 : MappingJackson2HttpMessageConverter(JSON)
+      - byte처리 등 기타 여러가지 HttpMessageConverter가 기본으로 등록이 되어있음
+      - 응답의 경우, 클라이언트의 HTTP Accept 헤더와 서버 컨트롤러 반환 타입 정보를 조합해서 선택됨
+  - 스프링 MVC의 경우, 다음 경우에 HTTP 메세지 컨버터를 적용
+    - HTTP 요청 : @RequestBody, HttpEntity(RequestEntity)
+    - HTTP 응답 : @ResponseBody, HttpEntity(ResponseEntity)
+  - HTTP 메세지 컨버터는 인터페이스로 되어있음 
+  - HTTP 메세지 컨버터는 HTTP 요청, 응답 둘 다 사용된다.
+    - canRead(), canWrite() : 메세지 컨버터가 해당 클래스, 미디어 타입을 지원하는지 체크하는 메서드
+    - read(), write() : 위 메서드 통과하면 실제로 메세지를 읽고 쓰는 기능하는 메서드
+  - 메세지컨버터 메서드 우선순위 ,, 미디어 타입(Content-type)과 클래스 타입(리턴)를 조합해서 사용 여부 결정,, 만족하지않으면 다음 컨버터로 우선순위가 넘어감
+    - 0 : ByteArrayHttpMessageConverter
+      - byte[] 데이터를 처리
+        - 클래스 타입 : String
+        - 미디어 타입 : */*
+      - 요청 예) @RequestBody byte[] data
+      - 응답 예) @ResponseBody return byte[]
+        - 쓰기 미디어 타입 : application/octet-stream 
+    - 1 : StringHttpMessageConverter
+      - String 문자로 데이터를 처리
+        - 클래스 타입 : String
+        - 미디어 타입 : */*
+      - 요청 예) @RequestBody String data
+      - 응답 예) @ResponseBody return "ok"
+        - 쓰기 미디어 타입 : text/plain
+    - 2 : MappingJackson2HttpMessageConverter(JSON)
+      - JSON으로 데이터를 처리
+        - 클래스 타입 : 객체 또는 HashMap
+        - 미디어 타입 : application/json
+      - 요청 예) @RequestBody HelloData data
+      - 응답 예) @ResponsBody return helloData 
+        - 쓰기 미디어 타입 : application/json
+  - HTTP 요청 데이터 읽기 Process
+    - HTTP 요청이 오고 컨트롤러에서 @RequestBody, HttpEntity 파라미터를 사용한다
+    - 메세지 컨버터가 메세지를 읽을 수 있는지 확인하기 위해 canRead() 호출
+      - 대상 클래스 타입을 지원하는가
+        - ex) @RequestBody의 대상 클래스(byte[],String,HelloData(VO) 등)
+      - HTTP 요청의 Content-Type 미디어 타입을 지원하는가
+        - ex) text/plain, application/json, */*
+    - canRead() 조건을 만족하면 read()를 호출해서 객체를 생성하고, 반환
+  - HTTP 응답 데이터 쓰기 Process
+    - 컨트롤러에서 @ResponseBody, HttpEntity로 값이 반환되면
+    - 메세지 컨버터가 메세지를 쓸 수 있는지 확인하기 위해 canWrite() 호출
+      - 대상 클래스 타입을 지원하는지 확인
+        - ex) return의 대상 클래스(byte[], String, HelloData(vo))
+      - HTTP 요청의 Accept 미디어 타입을 지원하는지 확인(@RequestMapping의 produces)
+        - ex) text/plain, application/json, */*
+    - canWrite() 조건을 만족하면 write()를 호출해서 HTTP 응답 메세지 바디에 데이터를 생성.
+RequestMappingHandlerAdpater 구조
+  - RequestMapping 프로세스
+    - DispatcherServlet이 호출 된 후 RequestMapping 핸들러 어댑터 호출
+    - 해당 핸들러 어댑터가 ArgumentResolver 호출(정확한 명칭은 HandlerMethodArgumentResolver)
+      - 애노테이션 기반 컨트롤러는 다양한 파라미터를(@ModelAttribute, @RequestParam 등) 매우 유연하게 처리함
+      - 컨트롤러가 필요로 하는 다양한 파라미터의 값(객체)를 생성,, 
+      - RequestMapping 핸들러 어댑터로 객체를 넘겨줌
+      - Spring은 30개가 넘는 ArgumentResolver를 기본으로 제공
+        - 사용자가 원하면 직접 해당 인터펭시ㅡㄹ르 확장해서 만들 수 있다.
+    - ArgumentResolver로부터 받은 값이 준비되면 해당하는 핸들러(컨트롤러)를 호출
+    - ReturnValueHandler(정확한 명칭은 HandlerMethodReturnValueHandler)
+      - 컨트롤러의 반환값을 변환해주는 핸들러
+      - String으로 뷰 이름을 반환해도 동작하게 해주는 핸들러
+    - Http 메세지 컨버터는 
+      - 요청의 경우 : ArgumentResolver들이 HTTP 메세지 컨버터를 사용해서 필요한 객체를 생성
+      - 응답의 경우 : ReturnValueHandler가 HTTP 메세지 컨버터를 호출해서 응답 결과를 만듬
