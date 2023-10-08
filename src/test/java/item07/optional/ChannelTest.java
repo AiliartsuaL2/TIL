@@ -1,10 +1,10 @@
 package item07.optional;
 
 import org.junit.jupiter.api.Test;
+import section2.item07.optional.Channel;
+import section2.item07.optional.MembersShip;
 
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class ChannelTest {
 

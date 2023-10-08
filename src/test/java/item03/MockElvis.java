@@ -1,6 +1,6 @@
 package item03;
 
-import item03.field.IElvis;
+import section2.item03.field.IElvis;
 
 public class MockElvis implements IElvis {
     @Override

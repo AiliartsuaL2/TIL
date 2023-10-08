@@ -1,10 +1,11 @@
 package item15.product;
 
-import item15.member.MemberService;
+import section4.item15.member.MemberService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import section4.item15.product.ProductService;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -1,8 +1,8 @@
 package item08.finalizeattack;
 
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
+import section2.item08.finalizeattack.Account;
+import section2.item08.finalizeattack.BrokerAccount;
 
 class AccountTest {
     @Test

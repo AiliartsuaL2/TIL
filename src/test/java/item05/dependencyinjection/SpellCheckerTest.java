@@ -1,9 +1,8 @@
 package item05.dependencyinjection;
 
-import item05.DefaultDictionary;
+import section2.item05.DefaultDictionary;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
+import section2.item05.dependencyinjection.SpellChecker;
 
 class SpellCheckerTest {
 

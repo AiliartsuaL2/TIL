@@ -1,5 +1,6 @@
 package item05.staticutils;
 import org.junit.jupiter.api.Test;
+import section2.item05.staticutils.SpellChecker;
 
 import static org.junit.jupiter.api.Assertions.*;
 
