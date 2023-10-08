@@ -1,4 +1,4 @@
-package item08.finalizeattack;
+package section2.item08.finalizeattack;
 
 import org.junit.jupiter.api.Test;
 import section2.item08.finalizeattack.Account;

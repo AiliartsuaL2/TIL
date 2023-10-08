@@ -1,4 +1,4 @@
-package item07.optional;
+package section2.item07.optional;
 
 import org.junit.jupiter.api.Test;
 import section2.item07.optional.Channel;

@@ -1,4 +1,4 @@
-package item05.staticutils;
+package section2.item05.staticutils;
 import org.junit.jupiter.api.Test;
 import section2.item05.staticutils.SpellChecker;
 

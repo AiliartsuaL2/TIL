@@ -1,4 +1,4 @@
-package item15.product;
+package section4.item15.product;
 
 import section4.item15.member.MemberService;
 import org.junit.jupiter.api.Test;

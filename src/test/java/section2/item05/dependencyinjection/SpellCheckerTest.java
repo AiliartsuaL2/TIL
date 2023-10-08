@@ -1,4 +1,4 @@
-package item05.dependencyinjection;
+package section2.item05.dependencyinjection;
 
 import section2.item05.DefaultDictionary;
 import org.junit.jupiter.api.Test;
