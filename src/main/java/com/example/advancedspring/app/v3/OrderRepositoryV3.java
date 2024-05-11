@@ -11,10 +11,10 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class OrderRepositoryV3 {
     private final LogTrace trace;
-    public void save(TraceId traceId, String itemId) {
+    public void save(String itemId) {
         TraceStatus status = null;
         try {
-            status = trace.begin("OrderRepository.request()");
+            status = trace.begin("OrderRepository.save()");
 
             // 저장 로직
             if (itemId.equals("ex")) {

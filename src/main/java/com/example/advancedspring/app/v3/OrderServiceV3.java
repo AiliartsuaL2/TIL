@@ -16,8 +16,8 @@ public class OrderServiceV3 {
     public void orderItem(String itemId) {
         TraceStatus status = null;
         try {
-            status = trace.begin("OrderService.request()");
-            orderRepository.save(status.getTraceId(), itemId);
+            status = trace.begin("OrderService.orderItem()");
+            orderRepository.save(itemId);
             trace.end(status);
         } catch (IllegalStateException ex) {
             trace.exception(status, ex);
