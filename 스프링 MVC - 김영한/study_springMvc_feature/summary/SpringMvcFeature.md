@@ -1,0 +1,208 @@
+- 로깅
+  - 운영 시스템에서는 sout을 안쓰고 별도의 로깅 라이브러리를 사용,,
+  - 로깅 라이브러리
+    - 스프링부트 라이브러리는 기본적으로 starter에 slf4j가 제공됨
+        - slf4j
+          - log4j, logback, log4j2등 수많은 라이브러리들을 통합해서 인터페이스로 제공
+          - 실무에서는 스프링 부트에서 제공하는 Logback 구현체를 많이 사용
+      - 로그를 사용하면 시간, 스레드 등이 나옴,,
+      - trace,debug,info,warn,error등의 로깅 레벨을 설정 할 수 있음
+        - 로컬서버 : trace 레벨
+        - 개발서버 : debug 레벨
+        - 운영서버 : info 레벨
+      - application.properties에서 로그 레벨 설정 가능,
+      - 자바는 언어 특성상 연산자(+)가 있으면 컴파일 시점에 이미 그 문자들을 더하기 연산을 해버림
+        - 이렇게되면 trace 레벨에서 log({},name)이 아닌 +를 해주면 로깅은 출력되지 않아도 리소스를 사용해버리는 꼴,,
+        - 따라서 + 하지말고 {}를 처리해줘야함 
+      - 로거는 설정을 통해 파일로 별도로 남길 수 있고 sout보다 성능도 좋다
+- @RestController
+  - RestAPI가 많이 사용 되어 Spring에서 지원하는 애노테이션
+  - Controller+ResponseBody,, 
+  - 기본적으로 return이 String이면 뷰 이름으로 인식되나 RestController의 경우 바디에 해당 메세지를 바로 입력시킨다.
+- @RequestMapping
+  - url 설정
+    - url의경우 배열로도 설정 가능(다중 url 설정 가능!)
+    - 매핑이 /hello 이지만 url 요청은 /hello/, /hello 둘 다 허용해줌
+  - method 설정
+    - 설정 하지 않을경우 method와 무관하게 호출된다.
+    - GetMapping, PostMapping 등 지원
+  - 특정 param 추가 매핑
+    - 특정 파라미터가 있거나 없는 조건을 추가 할 수 있음
+    - 잘 사용 안함
+  - 특정 headers 추가 매핑
+    - 특정 헤더가 있거나 없는 조건 추가 가능
+    - 잘 사용 안함
+  - 미디어 타입 조건 매핑(Content-Type,, consume)
+    - consumes = "application/json" 이런식으로 미디어타입 설정 가능
+    - HTTP 요청 Accept 헤더와 RequestMapping의 produce 일치
+      - 일치하지 않으면 406에러
+  - @PathVariable 경로변수
+    - 경로에 오는 데이터를 변수로 꺼낼 수 있음
+    - 최근 Rest API는 다음과같이 리소스 경로에 식별자를 넣는 스타일 선호
+    - PathVariable의 이름과 파라미터가 같으면 생략 가능
+- 요청 파라미터
+  - 쿼리파라미터 
+    - GET - 쿼리 파라미터
+      - 메세지 바디 없이, URL의 쿼리 파라미터에 데이터를 포함해서 전달
+    - POST - HTML Form
+      - 메세지 바디에 쿼리 파라미터 형식으로 전달
+      - 쿼리 파라미터 형식이기 때문에 GET방식처럼 request.getParameter()로도 조회 가능함
+  - @RequestParam
+    - 파라미터 이름으로 바인딩 시킴
+    - 파라미터의 이름이 변수 이름과 같으면 name 속성 제거 가능
+    - 변수가 String,Integer,int등 단순 타입이면 @RequestParam도 생략 가능
+    - 하지만 애노테이션 정도는 살려두는게 유지보수 측면에서 좋음
+    - required 속성 : default는 true임
+      - true인경우 해당 파라미터가 없으면 해당 url 호출 안됨
+      - false인경우 값을 안넣으면 바인딩되는 변수에 null을 할당
+        - 이 때 해당 변수가 primitive타입인경우 null 할당이 안되기 때문에 주의 할 것  
+        - 따라서 박스타입으로 받거나 defaultValue 속성을 추가해주어야 함
+    - defaultValue 속성 : 속성이 없거나, 빈문자로 들어오는 값에 기본값을 설정해줌
+    - 요청 파라미터 Map으로 받기
+      - name속성 지정 없이 Map으로 받거나 MultiValueMap으로 받는다.
+      - Map(key=value)
+      - MultiValueMap(key=[value1,value2, ...])
+        - ex) (key=userIds, value=[id1, id2]) 이런식으로,, 들어옴
+      - 파라미터의 값이 1개가 확실하다면 Map을 사용해도 되지만, 그렇지 않다면 MultiValueMap을 사용한다!
+  - @ModelAttribute
+    - 보통 개발시 데이터를 바인딩해서 객체랑 매핑을 해주는 작업을 해줌,
+    - ModelAttribute 사용시, 해당 작업을 자동화해줌
+    - ModelAttribute 실행 순서
+      - 매핑되는 객체 생성
+      - 해당 객체의 프로퍼티를 찾아 setter 호출하여 파라미터의 값을 바인딩
+    - 바인딩 오류 : 숫자타입에 문자가 들어가는 경우 BindException 발생,,
+      - 해당 부분은 검증 부분에서 처리,,
+    - 해당 ModelAttribute도 생략 가능하다..
+      - @RequestParam도 생략 할 수 있는데 
+      - 스프링의 경우, String, int, Integer같은 단순 타입은 @RequestParam으로 처리하고
+      - 나머지는 @ModelAttribute로 처리한다.
+        - argumentResolver로 지정되어있는 타입(HttpServeltRequest 같은,,)은 ModelAttribute로 처리하지않음 
+- HTTP 요청 메세지 - 단순 텍스트
+  - HTTP API에서 사용,, JSON 형식,, 
+  - 요청 파라미터와 다르게, HTTP 메세지 바디를 통해 데이터가 넘어오는경우 @RequestParam, @ModelAttribute 사용 불가능
+    - 물론 POST로 HTML 폼인경우 요청파라미터로 인정됨
+  - Spring MVC는 다음 파라미터를 지원
+    - HttpEntity : HTTP header, body 정보를 편하게 조회 할 수 있음
+      - 요청 파라미터(Get에 쿼리 파라미터,, url?name=juho&age=23 )를 조회하는 기능과 관계 없음
+      - 응답에도 사용 가능
+        - 메세지 바디에 정보 직접 반환
+        - 헤더 정보 포함 가능
+        - view 조회 x
+      - HttpEntity를 상속받은 다음 객체들도 같은 기능 제공
+        - RequstEntity
+          - HttpMethod, url 정보가 추가, 요청에서 사용
+        - ResponseEntity
+          - Http 상태 코드 설정 가능,, 응답에서 사용 가능
+      - @RequestBody 제공
+        - 그냥 파라미터에 @RequestBody 선언해주고 String으로 받아버림
+        - @ResponseBody를 통해 응답에도 Body에 데이터를 넣어 전달 가능
+    - 이렇게 메세지 바디를 직접 조회하는 기능은 요청 파라미터(Get 파라미터)를 조회하는 @RequestParam, @ModelAttribute와는 전혀 관계 x
+  - HTTP 요청 메세지 - JSON
+    - @RequestBody 객체 파라미터
+      - HTTP 메세지 컨버터가 문자 뿐만 아니라 JSON도 자동으로 객체로 변환해줌
+        - @RequestBody VO data
+        - @RequestBody에 직접 만든 객체를 지정 할 수 있다.
+      - @RequestBody는 생략이 불가능하다.
+        - 스프링은 애노테이션 생략시 
+          - String,int,Integer 등의 단순 타입인경우 @RequestParam이 붙는다.
+          - 그 외 나머지 타입은 @ModelAttribute가 붙는다.
+          - 따라서 객체를 받는경우 @ModelAttribute가 적용되어 메세지 바디가 아닌 요청 파라미터를 처리하게 됨
+    - HTTP 요청시 content-type이 application/json인지 꼭 확인,,
+HTTP 응답
+    - 정적 리소스
+      - 웹 브라우저에 정적인 HTML, css, js를 제공 할 때는 정적 리소스 사용
+      - 스프링 부트는 클래스 패스의 다음 디렉토리에 있는 정적 리소스를 제공
+        - /static
+        - /public
+        - /resources/
+        - META-INF/resources
+    - 뷰 템플릿 사용
+      - 웹 브라우저에 동적인 HTML을 제공 할 때에는 뷰 템플릿을 사용한다.(서버 사이드 렌더링)
+      - 일반적으로 HTML을 동적으로 생성하는 용도로 사용하지만, 다른 것들도 사용 가능,,
+      - 스프링이 제공하는 기본 뷰 템플릿 경로
+        - src/main/resources/templates
+      - 컨트롤러 메서드의 반환 타입에 따른 변경
+        - String을 반환하는경우 
+          - @ResponseBody가 없으면 : 해당 경로의 뷰 리졸버가 실행되어 뷰를 찾고 렌더링
+          - @ResponseBody가 있으면 : 뷰 리졸버를 실행하지않고, HTTP 메세지 컨버터를 통하기때문에 HTTP 메세지 바디에 직접 해당 문자가 출력
+        - Void를 반환하는경우
+          - @Controller를 사용하고, HTTP 메세지 바디를 처리하는 파라미터가 없으면 요청 URL을 참고해서 논리 뷰 이름으로 사용
+          - 명시성이 너무 떨어져서 유지보수 헬 !! 권장하지 않음,,
+    - HTTP 메세지 사용
+      - HTTP API를 제공하는 경우, HTML이 아니라 데이터를 전달해야 하므로, HTTP 메세지 바디에 JSON 같은 형식으로 데이터를 보냄
+      - HTML이나 뷰 템플릿 사용해도 HTTP 응답 메세지 바디에 데이터가 담겨 전달됨
+      - ResponseEntity<VO> 로 반환하는 경우, 응답 코드를 지정 할 수 있지만 
+        - VO로 직접 반환하는 타입의 경우 반환 객체에 응답 코드를 지정 할 수 없기 때문에
+        - 애노테이션으로 @ResponseStatus(응답코드)로 지정 해줄 수 있다.
+          - 애노테이션이기 때문에 동적으로 설정 불가능,, 따라서 동적으로 응답코드 변경을 해야한다면 리턴타입을 ResponseEntity 사용
+        - 메서드에 @ResponseBody를 안붙이려면 클래스 레벨에 ResponseBody를 해도되고, Controller 대신 RestController 사용해도 좋다
+HTTP 메세지 컨버터
+  - 뷰 템플릿으로 HTML을 생성해서 응답하는것이 아니라, HTTP API처럼 JSON 데이터 사용하며 바디에 직접 읽거나 쓰는경우 HTTP 메세지 컨버터를 사용하면 편함
+  - @ResponseBody사용 원리
+    - 해당 어노테이션을 타면서 ViewResolver대신 HttpMessageConverter가 동작
+    - 반환타입이 객체인지 String인지 확인해서 해당 컨버터 메서드가 동작
+      - 기본 문자 처리 : StringHttpMessageConverter
+      - 기본 객체 처리 : MappingJackson2HttpMessageConverter(JSON)
+      - byte처리 등 기타 여러가지 HttpMessageConverter가 기본으로 등록이 되어있음
+      - 응답의 경우, 클라이언트의 HTTP Accept 헤더와 서버 컨트롤러 반환 타입 정보를 조합해서 선택됨
+  - 스프링 MVC의 경우, 다음 경우에 HTTP 메세지 컨버터를 적용
+    - HTTP 요청 : @RequestBody, HttpEntity(RequestEntity)
+    - HTTP 응답 : @ResponseBody, HttpEntity(ResponseEntity)
+  - HTTP 메세지 컨버터는 인터페이스로 되어있음 
+  - HTTP 메세지 컨버터는 HTTP 요청, 응답 둘 다 사용된다.
+    - canRead(), canWrite() : 메세지 컨버터가 해당 클래스, 미디어 타입을 지원하는지 체크하는 메서드
+    - read(), write() : 위 메서드 통과하면 실제로 메세지를 읽고 쓰는 기능하는 메서드
+  - 메세지컨버터 메서드 우선순위 ,, 미디어 타입(Content-type)과 클래스 타입(리턴)를 조합해서 사용 여부 결정,, 만족하지않으면 다음 컨버터로 우선순위가 넘어감
+    - 0 : ByteArrayHttpMessageConverter
+      - byte[] 데이터를 처리
+        - 클래스 타입 : String
+        - 미디어 타입 : */*
+      - 요청 예) @RequestBody byte[] data
+      - 응답 예) @ResponseBody return byte[]
+        - 쓰기 미디어 타입 : application/octet-stream 
+    - 1 : StringHttpMessageConverter
+      - String 문자로 데이터를 처리
+        - 클래스 타입 : String
+        - 미디어 타입 : */*
+      - 요청 예) @RequestBody String data
+      - 응답 예) @ResponseBody return "ok"
+        - 쓰기 미디어 타입 : text/plain
+    - 2 : MappingJackson2HttpMessageConverter(JSON)
+      - JSON으로 데이터를 처리
+        - 클래스 타입 : 객체 또는 HashMap
+        - 미디어 타입 : application/json
+      - 요청 예) @RequestBody HelloData data
+      - 응답 예) @ResponsBody return helloData 
+        - 쓰기 미디어 타입 : application/json
+  - HTTP 요청 데이터 읽기 Process
+    - HTTP 요청이 오고 컨트롤러에서 @RequestBody, HttpEntity 파라미터를 사용한다
+    - 메세지 컨버터가 메세지를 읽을 수 있는지 확인하기 위해 canRead() 호출
+      - 대상 클래스 타입을 지원하는가
+        - ex) @RequestBody의 대상 클래스(byte[],String,HelloData(VO) 등)
+      - HTTP 요청의 Content-Type 미디어 타입을 지원하는가
+        - ex) text/plain, application/json, */*
+    - canRead() 조건을 만족하면 read()를 호출해서 객체를 생성하고, 반환
+  - HTTP 응답 데이터 쓰기 Process
+    - 컨트롤러에서 @ResponseBody, HttpEntity로 값이 반환되면
+    - 메세지 컨버터가 메세지를 쓸 수 있는지 확인하기 위해 canWrite() 호출
+      - 대상 클래스 타입을 지원하는지 확인
+        - ex) return의 대상 클래스(byte[], String, HelloData(vo))
+      - HTTP 요청의 Accept 미디어 타입을 지원하는지 확인(@RequestMapping의 produces)
+        - ex) text/plain, application/json, */*
+    - canWrite() 조건을 만족하면 write()를 호출해서 HTTP 응답 메세지 바디에 데이터를 생성.
+RequestMappingHandlerAdpater 구조
+  - RequestMapping 프로세스
+    - DispatcherServlet이 호출 된 후 RequestMapping 핸들러 어댑터 호출
+    - 해당 핸들러 어댑터가 ArgumentResolver 호출(정확한 명칭은 HandlerMethodArgumentResolver)
+      - 애노테이션 기반 컨트롤러는 다양한 파라미터를(@ModelAttribute, @RequestParam 등) 매우 유연하게 처리함
+      - 컨트롤러가 필요로 하는 다양한 파라미터의 값(객체)를 생성,, 
+      - RequestMapping 핸들러 어댑터로 객체를 넘겨줌
+      - Spring은 30개가 넘는 ArgumentResolver를 기본으로 제공
+        - 사용자가 원하면 직접 해당 인터펭시ㅡㄹ르 확장해서 만들 수 있다.
+    - ArgumentResolver로부터 받은 값이 준비되면 해당하는 핸들러(컨트롤러)를 호출
+    - ReturnValueHandler(정확한 명칭은 HandlerMethodReturnValueHandler)
+      - 컨트롤러의 반환값을 변환해주는 핸들러
+      - String으로 뷰 이름을 반환해도 동작하게 해주는 핸들러
+    - Http 메세지 컨버터는 
+      - 요청의 경우 : ArgumentResolver들이 HTTP 메세지 컨버터를 사용해서 필요한 객체를 생성
+      - 응답의 경우 : ReturnValueHandler가 HTTP 메세지 컨버터를 호출해서 응답 결과를 만듬
